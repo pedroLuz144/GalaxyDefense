@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
-    private Texture image, tNave;
+    private Texture image, tNave, tituloPequeno, exit, trofeu, side, score;
     private Sprite nave;
     private float posX, posY, velocity;
 
@@ -20,11 +20,18 @@ public class Main extends ApplicationAdapter {
         batch = new SpriteBatch();
         image = new Texture("background.png");
         tNave = new Texture("nave.png");
-        nave = new Sprite(tNave); //A imagem é maior que o tamanho da navinha em si(ela tem 80 'pixeis vazios' para a direita e 190 para a esquerda), 
-                                  // considerar o tamanho dela como 80x85
+        nave = new Sprite(tNave); 
         posX = 720 - 190;
-        posY = 0;
+        posY = 50;
         velocity = 10;
+        
+        //Adições próprias
+        tituloPequeno = new Texture("tituloPequeno.png");
+        exit = new Texture("exit.png");
+        trofeu = new Texture("trofeu.png");
+        side = new Texture("side.png");
+        score = new Texture("score.png");
+
     }
 
     @Override
@@ -34,6 +41,14 @@ public class Main extends ApplicationAdapter {
         batch.begin();
         batch.draw(image, 0, 0);
         batch.draw(nave, posX, posY);
+        
+        //Adições próprias
+        batch.draw(tituloPequeno, 1113, 464);
+        batch.draw(exit, 1167, 247);
+        batch.draw(trofeu, 1318, 897);        
+        batch.draw(side, 0, 0);        
+        batch.draw(side, 1090, 0);        
+        batch.draw(score, 1160, 650);        
         batch.end();
     }
 
@@ -46,13 +61,23 @@ public class Main extends ApplicationAdapter {
 
     private void moveNave() {
         if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            if(posX < 1440 - 190 - 310) {
+            if(posX < 1440 - 88 - 355) {
                 posX += velocity;
             }
         }
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            if(posX > -80 + 310) {
+            if(posX > 359) {
                 posX -= velocity;
+            }
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            if(posY < 200) {
+                posY += velocity;
+            }
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            if(posY > 20) {
+                posY -= velocity;
             }
         }
     }
