@@ -11,8 +11,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
-    private Texture image, tNave, tituloPequeno, exit, trofeu, side, score;
-    private Sprite nave;
+    private Texture image, tNave, tBala, tituloPequeno, exit, trofeu, side, score;
+    private Sprite nave, bala;
     private float posX, posY, velocity;
 
     @Override
@@ -24,6 +24,10 @@ public class Main extends ApplicationAdapter {
         posX = 720 - 190;
         posY = 50;
         velocity = 10;
+        tBala = new Texture("bala.png");
+        bala = new Sprite(tBala);
+        xBala = posX;
+        yBala = posY;
         
         //Adições próprias
         tituloPequeno = new Texture("tituloPequeno.png");
