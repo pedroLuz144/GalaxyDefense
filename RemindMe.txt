@@ -1,0 +1,8 @@
+Falta:
+
+Conectar ao banco de dados
+Adicionar tela de login, leaderboard, inventário e loja
+Deixar os botões "clicaveis"
+
+
+Se der... Adicionar powerups e um boss a cada nível se pa
