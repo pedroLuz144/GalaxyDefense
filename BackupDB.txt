@@ -1,0 +1,13 @@
+create database galaxy_defense;
+use galaxy_defense;
+
+create table player (
+nome varchar(7) primary key,
+score int not null
+);
+
+create table ranking (
+nomeR varchar(7),
+highscore int,
+constraint foreign key (nomeR) references player(nome)
+);
