@@ -35,6 +35,7 @@ public class Main extends ApplicationAdapter {
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter, parameterLevel, parameterHighScore,
             parameterScoreAtual;
     private BitmapFont bitmap, bitmapLevel, bitmapHighScore, bitmapScoreAtual;
+    private DatabaseHelper actionSQL;
 
     @Override
     public void create() {
@@ -100,6 +101,7 @@ public class Main extends ApplicationAdapter {
         levelImg = new Texture("levelImg.png");
         scoreImg = new Texture("scoreImg.png");
         telaGameOver = new Texture("tela_gameover.png");
+        actionSQL = new DatabaseHelper();
 
     }
 
@@ -142,7 +144,7 @@ public class Main extends ApplicationAdapter {
             bitmapLevel.draw(batch, "" + level, 1220, 585);
 
             // High Score
-            bitmapHighScore.draw(batch, "" + highScore, 1220, 500);
+            bitmapHighScore.draw(batch, "" + actionSQL.getHighscore("Oplay"), 1220, 500);
 
             // Score da partida atual
             bitmapScoreAtual.draw(batch, "" + score, 550, 390);
@@ -259,4 +261,5 @@ public class Main extends ApplicationAdapter {
         }
         return false;
     }
+
 }
