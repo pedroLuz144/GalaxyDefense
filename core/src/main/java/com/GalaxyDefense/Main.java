@@ -23,10 +23,11 @@ import com.badlogic.gdx.utils.TimeUtils;
  */
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
-    private Texture image, tNave, tBala, tInimigo, tituloPequeno, exit, trofeu, side, levelImg, scoreImg, telaGameOver;
+    private Texture image, tNave, tBala, tInimigo, tituloPequeno, exit, trofeu, side, levelImg, scoreImg, telaGameOver,
+            homescreen;
     private Sprite nave, bala;
     private float posX, posY, velocity, xBala, yBala;
-    private boolean attack, gameOver;
+    private boolean attack, gameOver, gameStart;
     private Array<Rectangle> inimigos;
     private long tempoUltimoInimigo;
     private int score, power, numInimigos, level, highScore;
@@ -92,6 +93,7 @@ public class Main extends ApplicationAdapter {
         bitmapScoreAtual = generator.generateFont(parameter);
 
         gameOver = false;
+        gameStart = false;
 
         // Adições próprias
         tituloPequeno = new Texture("tituloPequeno.png");
@@ -101,6 +103,7 @@ public class Main extends ApplicationAdapter {
         levelImg = new Texture("levelImg.png");
         scoreImg = new Texture("scoreImg.png");
         telaGameOver = new Texture("tela_gameover.png");
+        homescreen = new Texture("homescreen.png");
         actionSQL = new DatabaseHelper();
 
     }
@@ -115,51 +118,58 @@ public class Main extends ApplicationAdapter {
         batch.begin();
         batch.draw(image, 0, 0);
 
-        // Adições próprias
-        batch.draw(tituloPequeno, 1113, 464);
-        batch.draw(exit, 1167, 247);
-        batch.draw(trofeu, 1318, 897);
-        batch.draw(side, 0, 0);
-        batch.draw(side, 1090, 0);
-        batch.draw(levelImg, 35, 650);
-        batch.draw(scoreImg, 1160, 650);
-
-        if (!gameOver) {
-            if (attack) {
-                batch.draw(bala, xBala + nave.getWidth() / 2 - 16, yBala + nave.getHeight() / 2 - 17);
+        if (!gameStart) {
+            batch.draw(homescreen, 0, 0);
+            if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                gameStart = true; 
             }
-            batch.draw(nave, posX, posY);
-
-            for (Rectangle inimigo : inimigos) {
-                batch.draw(tInimigo, inimigo.x, inimigo.y);
-            }
-            bitmap.draw(batch, "" + score, 1240, 735);
-            bitmap.draw(batch, "" + level, 130, 735);
         } else {
-            batch.draw(telaGameOver, 0, 0);
-            // Inimigos destruídos
-            bitmapLevel.draw(batch, "" + score, 1220, 685);
+            // Adições próprias
+            batch.draw(tituloPequeno, 1113, 464);
+            batch.draw(exit, 1167, 247);
+            batch.draw(trofeu, 1318, 897);
+            batch.draw(side, 0, 0);
+            batch.draw(side, 1090, 0);
+            batch.draw(levelImg, 35, 650);
+            batch.draw(scoreImg, 1160, 650);
 
-            // Level
-            bitmapLevel.draw(batch, "" + level, 1220, 585);
+            if (!gameOver) {
+                if (attack) {
+                    batch.draw(bala, xBala + nave.getWidth() / 2 - 16, yBala + nave.getHeight() / 2 - 17);
+                }
+                batch.draw(nave, posX, posY);
 
-            // High Score
-            bitmapHighScore.draw(batch, "" + actionSQL.getHighscore("Oplay"), 1220, 500);
+                for (Rectangle inimigo : inimigos) {
+                    batch.draw(tInimigo, inimigo.x, inimigo.y);
+                }
+                bitmap.draw(batch, "" + score, 1240, 735);
+                bitmap.draw(batch, "" + level, 130, 735);
+            } else {
+                batch.draw(telaGameOver, 0, 0);
+                // Inimigos destruídos
+                bitmapLevel.draw(batch, "" + score, 1220, 685);
 
-            // Score da partida atual
-            bitmapScoreAtual.draw(batch, "" + score, 550, 390);
+                // Level
+                bitmapLevel.draw(batch, "" + level, 1220, 585);
 
-            if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
-                score = 0;
-                power = 1;
-                level = 1;
-                posX = 720 - 190;
-                posY = 50;
-                inimigos.clear();
-                gameOver = false;
-                tempoUltimoInimigo = 0;
+                // High Score
+                bitmapHighScore.draw(batch, "" + actionSQL.getHighscore("Oplay"), 1220, 500);
+
+                // Score da partida atual
+                bitmapScoreAtual.draw(batch, "" + score, 550, 390);
+
+                if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
+                    score = 0;
+                    power = 1;
+                    level = 1;
+                    posX = 720 - 190;
+                    posY = 50;
+                    inimigos.clear();
+                    gameOver = false;
+                    tempoUltimoInimigo = 0;
+                }
+
             }
-
         }
 
         batch.end();
