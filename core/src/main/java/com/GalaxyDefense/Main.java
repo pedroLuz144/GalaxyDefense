@@ -24,10 +24,10 @@ import com.badlogic.gdx.utils.TimeUtils;
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
     private Texture image, tNave, tBala, tInimigo, tituloPequeno, exit, trofeu, side, levelImg, scoreImg, telaGameOver,
-            homescreen;
+            homescreen, loja;
     private Sprite nave, bala;
     private float posX, posY, velocity, xBala, yBala;
-    private boolean attack, gameOver, gameStart;
+    private boolean attack, gameOver, gameStart, lojaStart;
     private Array<Rectangle> inimigos;
     private long tempoUltimoInimigo;
     private int score, power, numInimigos, level, highScore;
@@ -94,6 +94,7 @@ public class Main extends ApplicationAdapter {
 
         gameOver = false;
         gameStart = false;
+        lojaStart = false;
 
         // Adições próprias
         tituloPequeno = new Texture("tituloPequeno.png");
@@ -104,6 +105,7 @@ public class Main extends ApplicationAdapter {
         scoreImg = new Texture("scoreImg.png");
         telaGameOver = new Texture("tela_gameover.png");
         homescreen = new Texture("homescreen.png");
+        loja = new Texture("loja.png");
         actionSQL = new DatabaseHelper();
 
     }
@@ -111,20 +113,31 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         batch.begin();
-        
-        if (!gameStart) {
+
+        if (!gameStart) { 
             batch.draw(homescreen, 0, 0);
-            if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                gameStart = true; 
+
+            if (!lojaStart) {
+                if (Gdx.input.isKeyPressed(Input.Keys.L)) {
+                    lojaStart = true;
+                }
+                if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                    gameStart = true;
+                }
+            } else { 
+                batch.draw(loja, 0, 0);
+                if (Gdx.input.isKeyPressed(Input.Keys.H)) { 
+                    lojaStart = false;
+                }
             }
         } else {
             this.moveNave();
             this.moveBala();
             this.moveInimigos();
-    
+
             ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
             batch.draw(image, 0, 0);
-            
+
             // Adições próprias
             batch.draw(tituloPequeno, 1113, 464);
             batch.draw(exit, 1167, 247);
