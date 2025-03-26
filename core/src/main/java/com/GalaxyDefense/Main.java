@@ -110,20 +110,21 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
-        this.moveNave();
-        this.moveBala();
-        this.moveInimigos();
-
-        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
         batch.begin();
-        batch.draw(image, 0, 0);
-
+        
         if (!gameStart) {
             batch.draw(homescreen, 0, 0);
             if (Gdx.input.isKeyPressed(Input.Keys.S)) {
                 gameStart = true; 
             }
         } else {
+            this.moveNave();
+            this.moveBala();
+            this.moveInimigos();
+    
+            ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
+            batch.draw(image, 0, 0);
+            
             // Adições próprias
             batch.draw(tituloPequeno, 1113, 464);
             batch.draw(exit, 1167, 247);
