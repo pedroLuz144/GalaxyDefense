@@ -1,6 +1,7 @@
 package com.GalaxyDefense;
 
 import java.util.Iterator;
+import java.util.List;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -24,18 +25,18 @@ import com.badlogic.gdx.utils.TimeUtils;
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
     private Texture image, tNave, tBala, tInimigo, tituloPequeno, exit, trofeu, side, levelImg, scoreImg, telaGameOver,
-            homescreen, loja;
+            homescreen, loja, leaderboard;
     private Sprite nave, bala;
     private float posX, posY, velocity, xBala, yBala;
-    private boolean attack, gameOver, gameStart, lojaStart;
+    private boolean attack, gameOver, gameStart, lojaStart, leaderboardStart;
     private Array<Rectangle> inimigos;
     private long tempoUltimoInimigo;
     private int score, power, numInimigos, level, highScore;
 
     private FreeTypeFontGenerator generator;
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter, parameterLevel, parameterHighScore,
-            parameterScoreAtual;
-    private BitmapFont bitmap, bitmapLevel, bitmapHighScore, bitmapScoreAtual;
+            parameterScoreAtual, parameterLeaderboard;
+    private BitmapFont bitmap, bitmapLevel, bitmapHighScore, bitmapScoreAtual, bitmapLeaderboard;
     private DatabaseHelper actionSQL;
 
     @Override
@@ -92,9 +93,17 @@ public class Main extends ApplicationAdapter {
         parameter.color = new Color(255f / 255f, 31f / 255f, 31f / 255f, 1f);
         bitmapScoreAtual = generator.generateFont(parameter);
 
+        parameterLeaderboard = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 40;
+        parameter.borderWidth = 1;
+        parameter.borderColor = Color.BLACK;
+        parameter.color = Color.WHITE;
+        bitmapLeaderboard = generator.generateFont(parameter);
+
         gameOver = false;
         gameStart = false;
         lojaStart = false;
+        leaderboardStart = false;
 
         // Adições próprias
         tituloPequeno = new Texture("tituloPequeno.png");
@@ -106,6 +115,7 @@ public class Main extends ApplicationAdapter {
         telaGameOver = new Texture("tela_gameover.png");
         homescreen = new Texture("homescreen.png");
         loja = new Texture("loja.png");
+        leaderboard = new Texture("leaderboard.png");
         actionSQL = new DatabaseHelper();
 
     }
@@ -114,21 +124,53 @@ public class Main extends ApplicationAdapter {
     public void render() {
         batch.begin();
 
-        if (!gameStart) { 
+        if (!gameStart) {
             batch.draw(homescreen, 0, 0);
+
+            if (!leaderboardStart) {
+                if (Gdx.input.isKeyPressed(Input.Keys.T)) {
+                    leaderboardStart = true;
+                }
+            } else {
+                batch.draw(leaderboard, 0, 0);
+                List<Ranking> ranking = actionSQL.getRanking();
+                float yOffset = 800;
+                float startXNome = 540; // Posição X inicial para o nome
+                int larguraNome = 20; // Largura fixa para a coluna do nome (ajuste conforme necessário)
+                float startXScore = 800; // Posição X onde a coluna do score deve começar (ajuste conforme necessário)
+
+                for (Ranking item : ranking) {
+                    String nome = item.getNome();
+                    int highscore = item.getHighscore();
+
+                    // Formata o nome com largura fixa e alinhamento à esquerda
+                    String nomeFormatado = String.format("%-" + larguraNome + "s", nome);
+
+                    // Desenha o nome formatado na sua posição
+                    bitmapLeaderboard.draw(batch, nomeFormatado, startXNome, yOffset);
+
+                    // Desenha o score na posição fixa para a coluna de score
+                    bitmapLeaderboard.draw(batch, String.valueOf(highscore), startXScore, yOffset);
+
+                    yOffset -= 50;
+                }
+                if (Gdx.input.isKeyPressed(Input.Keys.H)) {
+                    leaderboardStart = false;
+                }
+            }
 
             if (!lojaStart) {
                 if (Gdx.input.isKeyPressed(Input.Keys.L)) {
                     lojaStart = true;
                 }
-                if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    gameStart = true;
-                }
-            } else { 
+            } else {
                 batch.draw(loja, 0, 0);
-                if (Gdx.input.isKeyPressed(Input.Keys.H)) { 
+                if (Gdx.input.isKeyPressed(Input.Keys.H)) {
                     lojaStart = false;
                 }
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                gameStart = true;
             }
         } else {
             this.moveNave();

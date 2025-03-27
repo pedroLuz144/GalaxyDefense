@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHelper {
 
@@ -24,8 +26,9 @@ public class DatabaseHelper {
     public int getHighscore(String jogadorId) {
         int score = 0;
         try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("SELECT highscore FROM ranking WHERE nomeR = ?")) {
-            preparedStatement.setString(1, jogadorId); 
+                PreparedStatement preparedStatement = connection
+                        .prepareStatement("SELECT highscore FROM ranking WHERE nomeR = ?")) {
+            preparedStatement.setString(1, jogadorId);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 score = resultSet.getInt("highscore");
@@ -36,9 +39,26 @@ public class DatabaseHelper {
         return score;
     }
 
+    public List<Ranking> getRanking() {
+        List<Ranking> rankingList = new ArrayList<>();
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("SELECT nomeR, highscore FROM ranking ORDER BY highscore DESC LIMIT 5")) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String nome = resultSet.getString("nomeR");
+                int highscore = resultSet.getInt("highscore");
+                rankingList.add(new Ranking(nome, highscore));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rankingList;
+    }
+
     public void salvarPontuacao(int jogadorId, int pontuacao) {
         try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("UPDATE jogadores SET pontuacao = ? WHERE id = ?")) {
+                PreparedStatement preparedStatement = connection
+                        .prepareStatement("UPDATE jogadores SET pontuacao = ? WHERE id = ?")) {
             preparedStatement.setInt(1, pontuacao);
             preparedStatement.setInt(2, jogadorId);
             preparedStatement.executeUpdate();
@@ -47,5 +67,4 @@ public class DatabaseHelper {
         }
     }
 
-    // Outras operações de banco de dados...
 }
