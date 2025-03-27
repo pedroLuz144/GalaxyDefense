@@ -31,7 +31,7 @@ public class Main extends ApplicationAdapter {
     private boolean attack, gameOver, gameStart, lojaStart, leaderboardStart;
     private Array<Rectangle> inimigos;
     private long tempoUltimoInimigo;
-    private int score, power, numInimigos, level, highScore;
+    private int score, power, numInimigos, level, highScore, inimigosMortos;
 
     private FreeTypeFontGenerator generator;
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter, parameterLevel, parameterHighScore,
@@ -60,6 +60,7 @@ public class Main extends ApplicationAdapter {
         tempoUltimoInimigo = 0;
 
         score = 0;
+        inimigosMortos = 0;
         power = 1;
         numInimigos = 899999999;
         level = 1;
@@ -203,7 +204,7 @@ public class Main extends ApplicationAdapter {
             } else {
                 batch.draw(telaGameOver, 0, 0);
                 // Inimigos destruídos
-                bitmapLevel.draw(batch, "" + score, 1220, 685);
+                bitmapLevel.draw(batch, "" + inimigosMortos, 1220, 685);
 
                 // Level
                 bitmapLevel.draw(batch, "" + level, 1220, 585);
@@ -216,6 +217,7 @@ public class Main extends ApplicationAdapter {
 
                 if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
                     score = 0;
+                    inimigosMortos = 0;
                     power = 1;
                     level = 1;
                     posX = 720 - 190;
@@ -297,7 +299,8 @@ public class Main extends ApplicationAdapter {
             // Colisão com a bala
             if (colisao(inimigo.x, inimigo.y, inimigo.width, inimigo.height, xBala, yBala, bala.getWidth(),
                     bala.getHeight()) && attack) {
-                ++score;
+                score += 5;
+                ++inimigosMortos;
                 if (score % 15 == 0) {
                     numInimigos -= 100;
                     ++level;
