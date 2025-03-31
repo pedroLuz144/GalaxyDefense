@@ -39,6 +39,11 @@ public class Main extends ApplicationAdapter {
     private BitmapFont bitmap, bitmapLevel, bitmapHighScore, bitmapScoreAtual, bitmapLeaderboard;
     private DatabaseHelper actionSQL;
 
+    private Rectangle botaoStart;
+    private Rectangle botaoLoja;
+    private Rectangle botaoRanking;
+    private Rectangle botaoVoltar;
+
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -119,6 +124,10 @@ public class Main extends ApplicationAdapter {
         leaderboard = new Texture("leaderboard.png");
         actionSQL = new DatabaseHelper();
 
+        botaoStart = new Rectangle(558, 220, 332, 141);
+        botaoLoja = new Rectangle(1217, 360, 166, 186);
+        botaoRanking = new Rectangle(1259, 820, 100, 100);
+
     }
 
     @Override
@@ -128,50 +137,42 @@ public class Main extends ApplicationAdapter {
         if (!gameStart) {
             batch.draw(homescreen, 0, 0);
 
-            if (!leaderboardStart) {
-                if (Gdx.input.isKeyPressed(Input.Keys.T)) {
-                    leaderboardStart = true;
+            if (!leaderboardStart && !lojaStart) {
+                if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                    float mouseX = Gdx.input.getX();
+                    float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
+                    if (botaoStart.contains(mouseX, mouseY)) {
+                        gameStart = true;
+                    } else if (botaoLoja.contains(mouseX, mouseY)) {
+                        lojaStart = true;
+                    } else if (botaoRanking.contains(mouseX, mouseY)) {
+                        leaderboardStart = true;
+                    }
                 }
-            } else {
+            } else if (leaderboardStart) {
                 batch.draw(leaderboard, 0, 0);
                 List<Ranking> ranking = actionSQL.getRanking();
                 float yOffset = 800;
-                float startXNome = 540; // Posição X inicial para o nome
-                int larguraNome = 20; // Largura fixa para a coluna do nome (ajuste conforme necessário)
-                float startXScore = 800; // Posição X onde a coluna do score deve começar (ajuste conforme necessário)
+                float startXNome = 540;
+                int larguraNome = 20;
+                float startXScore = 800;
 
                 for (Ranking item : ranking) {
                     String nome = item.getNome();
                     int highscore = item.getHighscore();
-
-                    // Formata o nome com largura fixa e alinhamento à esquerda
                     String nomeFormatado = String.format("%-" + larguraNome + "s", nome);
-
-                    // Desenha o nome formatado na sua posição
                     bitmapLeaderboard.draw(batch, nomeFormatado, startXNome, yOffset);
-
-                    // Desenha o score na posição fixa para a coluna de score
                     bitmapLeaderboard.draw(batch, String.valueOf(highscore), startXScore, yOffset);
-
                     yOffset -= 50;
                 }
-                if (Gdx.input.isKeyPressed(Input.Keys.H)) {
+                if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                     leaderboardStart = false;
                 }
-            }
-
-            if (!lojaStart) {
-                if (Gdx.input.isKeyPressed(Input.Keys.L)) {
-                    lojaStart = true;
-                }
-            } else {
+            } else if (lojaStart) {
                 batch.draw(loja, 0, 0);
-                if (Gdx.input.isKeyPressed(Input.Keys.H)) {
+                if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                     lojaStart = false;
                 }
-            }
-            if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                gameStart = true;
             }
         } else {
             this.moveNave();
@@ -208,11 +209,7 @@ public class Main extends ApplicationAdapter {
 
                 // Level
                 bitmapLevel.draw(batch, "" + level, 1220, 585);
-
-                // High Score
                 bitmapHighScore.draw(batch, "" + actionSQL.getHighscore("Oplay"), 1220, 500);
-
-                // Score da partida atual
                 bitmapScoreAtual.draw(batch, "" + score, 550, 390);
 
                 if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
@@ -226,7 +223,6 @@ public class Main extends ApplicationAdapter {
                     gameOver = false;
                     tempoUltimoInimigo = 0;
                 }
-
             }
         }
 
