@@ -243,6 +243,7 @@ public class Main extends ApplicationAdapter {
                 bitmapLevel.draw(batch, "" + level, 1220, 585);
                 bitmapHighScore.draw(batch, "" + actionSQL.getHighscore("Oplay"), 1220, 500);
                 bitmapScoreAtual.draw(batch, "" + score, 550, 390);
+                actionSQL.salvarJogador(nickname,score);
 
                 if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
                     score = 0;
@@ -329,8 +330,8 @@ public class Main extends ApplicationAdapter {
                     bala.getHeight()) && attack) {
                 score += 5;
                 ++inimigosMortos;
-                if (score % 15 == 0) {
-                    numInimigos -= 100;
+                if (score % 50 == 0) {
+                    numInimigos -= 200;
                     ++level;
                 }
                 attack = false;

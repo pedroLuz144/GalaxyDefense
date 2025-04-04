@@ -55,25 +55,49 @@ public class DatabaseHelper {
         return rankingList;
     }
 
-    public void salvarPontuacao(int jogadorId, int pontuacao) {
-        try (Connection connection = getConnection();
-                PreparedStatement preparedStatement = connection
-                        .prepareStatement("UPDATE jogadores SET pontuacao = ? WHERE id = ?")) {
-            preparedStatement.setInt(1, pontuacao);
-            preparedStatement.setInt(2, jogadorId);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void salvarJogador(String nome, int pontuacao) {
-        try (Connection connection = getConnection();
-                PreparedStatement preparedStatement = connection
-                        .prepareStatement("INSERT INTO player (nome, score) VALUES (?, ?)")) {
-            preparedStatement.setString(1, nome);
-            preparedStatement.setInt(2, pontuacao);
-            preparedStatement.executeUpdate();
+        try (Connection connection = getConnection()) {
+            try (PreparedStatement checkPlayerStatement = connection.prepareStatement("SELECT COUNT(*) FROM player WHERE nome = ?")) {
+                checkPlayerStatement.setString(1, nome);
+                ResultSet playerResult = checkPlayerStatement.executeQuery();
+                playerResult.next();
+                int playerCount = playerResult.getInt(1);
+    
+                if (playerCount == 0) {
+                    try (PreparedStatement insertPlayerStatement = connection.prepareStatement("INSERT INTO player (nome, score) VALUES (?, ?)")) {
+                        insertPlayerStatement.setString(1, nome);
+                        insertPlayerStatement.setInt(2, pontuacao);
+                        insertPlayerStatement.executeUpdate();
+                    }
+                    try (PreparedStatement insertRankingStatement = connection.prepareStatement("INSERT INTO ranking (nomeR, highscore) VALUES (?, ?)")) {
+                        insertRankingStatement.setString(1, nome);
+                        insertRankingStatement.setInt(2, pontuacao);
+                        insertRankingStatement.executeUpdate();
+                    }
+                } else {
+                    try (PreparedStatement checkRankingStatement = connection.prepareStatement("SELECT highscore FROM ranking WHERE nomeR = ?")) {
+                        checkRankingStatement.setString(1, nome);
+                        ResultSet rankingResult = checkRankingStatement.executeQuery();
+    
+                        if (rankingResult.next()) {
+                            int currentHighscore = rankingResult.getInt("highscore");
+                            if (pontuacao > currentHighscore) {
+                                try (PreparedStatement updateRankingStatement = connection.prepareStatement("UPDATE ranking SET highscore = ? WHERE nomeR = ?")) {
+                                    updateRankingStatement.setInt(1, pontuacao);
+                                    updateRankingStatement.setString(2, nome);
+                                    updateRankingStatement.executeUpdate();
+                                }
+                            }
+                        } else {
+                            try (PreparedStatement insertRankingStatement = connection.prepareStatement("INSERT INTO ranking (nomeR, highscore) VALUES (?, ?)")) {
+                                insertRankingStatement.setString(1, nome);
+                                insertRankingStatement.setInt(2, pontuacao);
+                                insertRankingStatement.executeUpdate();
+                            }
+                        }
+                    }
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
