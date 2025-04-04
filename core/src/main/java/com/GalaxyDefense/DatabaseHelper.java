@@ -67,4 +67,16 @@ public class DatabaseHelper {
         }
     }
 
+    public void salvarJogador(String nome, int pontuacao) {
+        try (Connection connection = getConnection();
+                PreparedStatement preparedStatement = connection
+                        .prepareStatement("INSERT INTO player (nome, score) VALUES (?, ?)")) {
+            preparedStatement.setString(1, nome);
+            preparedStatement.setInt(2, pontuacao);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

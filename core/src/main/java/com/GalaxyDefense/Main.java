@@ -18,10 +18,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 
-/**
- * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all
- * platforms.
- */
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
     private Texture image, tNave, tBala, tInimigo, tituloPequeno, exit, trofeu, side, levelImg, scoreImg, telaGameOver,
@@ -32,6 +28,8 @@ public class Main extends ApplicationAdapter {
     private Array<Rectangle> inimigos;
     private long tempoUltimoInimigo;
     private int score, power, numInimigos, level, highScore, inimigosMortos;
+    private String nickname;
+    private boolean nicknameActive, nicknameEntered;
 
     private FreeTypeFontGenerator generator;
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter, parameterLevel, parameterHighScore,
@@ -43,6 +41,7 @@ public class Main extends ApplicationAdapter {
     private Rectangle botaoLoja;
     private Rectangle botaoRanking;
     private Rectangle botaoVoltar;
+    private Rectangle nicknameBox;
 
     @Override
     public void create() {
@@ -61,7 +60,7 @@ public class Main extends ApplicationAdapter {
         attack = false;
 
         tInimigo = new Texture("inimigo.png");
-        inimigos = new Array<Rectangle>();
+        inimigos = new Array<>();
         tempoUltimoInimigo = 0;
 
         score = 0;
@@ -75,7 +74,7 @@ public class Main extends ApplicationAdapter {
         parameter.size = 48;
         parameter.borderWidth = 1;
         parameter.borderColor = Color.BLACK;
-        parameter.color = new Color(255f / 255f, 204f / 255f, 0f / 255f, 1f); // FFCC00 (Amarelo)
+        parameter.color = new Color(255f / 255f, 204f / 255f, 0f / 255f, 1f);
         bitmap = generator.generateFont(parameter);
 
         parameterLevel = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -106,12 +105,16 @@ public class Main extends ApplicationAdapter {
         parameter.color = Color.WHITE;
         bitmapLeaderboard = generator.generateFont(parameter);
 
+        nickname = "";
+        nicknameActive = false;
+        nicknameEntered = false;
+        nicknameBox = new Rectangle(540, 500, 360, 60);
+
         gameOver = false;
         gameStart = false;
         lojaStart = false;
         leaderboardStart = false;
 
-        // Adições próprias
         tituloPequeno = new Texture("tituloPequeno.png");
         exit = new Texture("exit.png");
         trofeu = new Texture("trofeu.png");
@@ -127,16 +130,49 @@ public class Main extends ApplicationAdapter {
         botaoStart = new Rectangle(558, 220, 332, 141);
         botaoLoja = new Rectangle(1217, 360, 166, 186);
         botaoRanking = new Rectangle(1259, 820, 100, 100);
-
     }
 
     @Override
     public void render() {
         batch.begin();
 
-        if (!gameStart) {
-            batch.draw(homescreen, 0, 0);
+        if (!nicknameEntered) {
+            ScreenUtils.clear(0, 0, 0, 1);
+            bitmap.draw(batch, "Digite seu Nickname:", 540, 580);
+            bitmap.draw(batch, nickname + (System.currentTimeMillis() % 1000 < 500 ? "|" : ""), nicknameBox.x + 10, nicknameBox.y + 40);
 
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && !nickname.isEmpty()) {
+                nicknameEntered = true;
+            } else {
+                for (int i = 0; i < 26; i++) {
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.A + i)) {
+                        if (nickname.length() < 7) {
+                            nickname += (char) ('A' + i);
+                        }
+                    }
+                }
+                for (int i = 0; i < 10; i++) {
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_0 + i)) {
+                        if (nickname.length() < 7) {
+                            nickname += (char) ('0' + i);
+                        }
+                    }
+                }
+                if (Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE) && nickname.length() > 0) {
+                    nickname = nickname.substring(0, nickname.length() - 1);
+                }
+            }
+
+            batch.end();
+            return;
+        }
+
+        batch.draw(homescreen, 0, 0);
+
+        // Exibe o nickname no canto superior esquerdo
+        bitmap.draw(batch, "Nick: " + nickname, 30, Gdx.graphics.getHeight() - 30);
+
+        if (!gameStart) {
             if (!leaderboardStart && !lojaStart) {
                 if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                     float mouseX = Gdx.input.getX();
@@ -182,7 +218,6 @@ public class Main extends ApplicationAdapter {
             ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
             batch.draw(image, 0, 0);
 
-            // Adições próprias
             batch.draw(tituloPequeno, 1113, 464);
             batch.draw(exit, 1167, 247);
             batch.draw(trofeu, 1318, 897);
@@ -204,10 +239,7 @@ public class Main extends ApplicationAdapter {
                 bitmap.draw(batch, "" + level, 130, 735);
             } else {
                 batch.draw(telaGameOver, 0, 0);
-                // Inimigos destruídos
                 bitmapLevel.draw(batch, "" + inimigosMortos, 1220, 685);
-
-                // Level
                 bitmapLevel.draw(batch, "" + level, 1220, 585);
                 bitmapHighScore.draw(batch, "" + actionSQL.getHighscore("Oplay"), 1220, 500);
                 bitmapScoreAtual.draw(batch, "" + score, 550, 390);
@@ -234,6 +266,7 @@ public class Main extends ApplicationAdapter {
         batch.dispose();
         image.dispose();
         tNave.dispose();
+        homescreen.dispose();
     }
 
     private void moveNave() {
@@ -292,7 +325,6 @@ public class Main extends ApplicationAdapter {
         for (Iterator<Rectangle> iter = inimigos.iterator(); iter.hasNext();) {
             Rectangle inimigo = iter.next();
             inimigo.y -= 400 * Gdx.graphics.getDeltaTime();
-            // Colisão com a bala
             if (colisao(inimigo.x, inimigo.y, inimigo.width, inimigo.height, xBala, yBala, bala.getWidth(),
                     bala.getHeight()) && attack) {
                 score += 5;
@@ -305,7 +337,6 @@ public class Main extends ApplicationAdapter {
                 iter.remove();
                 xBala = posX;
                 yBala = posY;
-                // Colisão com a nave
             } else if (colisao(inimigo.x, inimigo.y, inimigo.width, inimigo.height, posX, posY, nave.getWidth(),
                     nave.getHeight()) && !gameOver) {
                 --power;
@@ -326,5 +357,4 @@ public class Main extends ApplicationAdapter {
         }
         return false;
     }
-
 }
